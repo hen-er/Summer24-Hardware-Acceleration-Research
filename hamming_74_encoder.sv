@@ -3,7 +3,7 @@
 
 module encoder(
     input logic [3:0] SW,
-    output logic [7:1]encoded_data
+    output logic [7:1]encoded_data//output variable that will contain our encoded data
     );
     
     always_comb
