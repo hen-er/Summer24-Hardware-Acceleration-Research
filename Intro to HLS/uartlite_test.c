@@ -1,20 +1,9 @@
 /******************************************************************************/
 /**
 *
-* File: UARTLite_test.c
-*
 * Description: example of minimal Tx testing of the UART Lite core v2.0, and sends   
 *              the entire english alphabet at 9600 Buad, 8 data bits, no parity,
 *
-* Notes:
-*
-*
-* MODIFICATION HISTORY:
-* <pre>
-* Ver   Who  Date	 Changes
-* ----- ---- -------- -----------------------------------------------
-* 1.00a DM   8/12/21  First release
-* </pre>
 ******************************************************************************/
 
 /***************************** Include Files *********************************/
