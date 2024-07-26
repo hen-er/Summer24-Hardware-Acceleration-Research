@@ -1,7 +1,6 @@
 /******************************************************************************
 
-<name_of_application>: simple application layer meant to input correctly formatted data to
-hamming top module.
+my_uartlite_tests: simple application layer meant to test and understand data transmission and reception from Tera Term.
 
 
 The "xgpio.h" file throws error: "In included file: 'xpseudo_asm.h' file not found."
@@ -11,7 +10,6 @@ and the application synthesizes fine.
  */
 
 #include <stdio.h>
-//#include <stdlib.h>
 #include "xil_types.h"
 #include <sys/_intsup.h>
 #include "platform.h"
@@ -19,7 +17,6 @@ and the application synthesizes fine.
 #include "xstatus.h"
 #include "xparameters.h"
 #include "xuartlite.h"
-//#include "xgpio.h" 
 
 /* Constant Definitions */
 #define XPAR_AXI_UARTLITE_0_DEVICE_ID 0
@@ -34,14 +31,13 @@ void UARTlite_Test_0(XUartLite *InstancePTR);
 
 /* Variable Definitions */
 XUartLite UartLite0; // instance of AXI UARTlite core
-XUartLite_Config *UartLite0_Config;
-
 unsigned int TO_RECEIVE = 32;
- /*
-Step 1: test whether I am recieving data through the terminal
+
+/*
+Step 1: test whether I am receiving data through the terminal
     - I will check this by testing the XUartLite_Recv function and displaying the result to the terminal using the print function
-Step2: depenfing on (a) whether I am recieving data and (b) HOW I am recieving that data, intercept the communication by
-storcing the recieved data in a buffer and sending it as an output through the gpio to the module.
+Step2: depending on (a) whether I am receiving data and (b) HOW I am receiving that data, intercept the communication by
+storing the received data in a buffer and sending it as an output through the GPIO to the module.
 */
 int main() {
     init_platform();
@@ -51,7 +47,7 @@ int main() {
     */
     int Status;
   
-    // perform initialization and tests
+    //Perform initialization and tests
     Status = UARTLite_Init_SelfTest(UARTLITE_DEVICE_ID);
     if (Status != XST_SUCCESS)
         {
@@ -60,7 +56,7 @@ int main() {
 
 
     /*
-    manually reseting FIFOs since it doesn't automatically do that
+    Manually resetting FIFOs since it doesn't automatically do that
     */
     XUartLite_ResetFifos(&UartLite0); 
 
@@ -125,7 +121,7 @@ void UARTlite_Test_0(XUartLite *InstancePTR){
 /*****************************************************************************/
 /**
 *
-* Description: Initializes UART Lite and does a self test
+* Description: Initializes UART Lite and does a self-test
 *
 *
 * Arguments: DeviceID is the DeviceId is the Device ID of the UartLite and is the
