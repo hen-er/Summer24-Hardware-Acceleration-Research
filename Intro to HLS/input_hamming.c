@@ -24,7 +24,6 @@ digits of the ASCII.
 #include "xstatus.h"
 #include "xparameters.h"
 #include "xuartlite.h"
-//#include "xgpio.h" 
 
 /* Constant Definitions */
 #define XPAR_AXI_UARTLITE_0_DEVICE_ID 0
@@ -37,6 +36,8 @@ int UARTLite_Init_SelfTest(u16 DeviceID);
 
 /* Variable Definitions */
 XUartLite UartLite0; // instance of AXI UARTlite core
+XGpio output; //output of the processor, input to the hamming module
+
 
 int main() {
     init_platform();
@@ -48,7 +49,6 @@ int main() {
     */
     int Status; //for status checks on uart and gpio
     int numBytes; //for data reception from UART;
-    XGpio output; //output of the processor, input to the hamming module
     u8 input; //buffer for data received from terminal, input to the processor
 
     /*
