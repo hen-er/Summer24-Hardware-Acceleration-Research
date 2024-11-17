@@ -13,6 +13,7 @@
 #include "xstatus.h"
 #include "xparameters.h"
 #include "xuartlite.h"
+#include <stdio.h>
 
 /************************** Constant Definitions *****************************/
 #define XPAR_AXI_UARTLITE_0_DEVICE_ID 0
@@ -66,12 +67,16 @@ XUartLite UartLite0;
 int main()
 {
     int UartLiteStatus;
-  int TxStatus;
+    int TxStatus;
 
   init_platform();
   
   UartLiteStatus = UARTLite_Init_SelfTest(UARTLITE_DEVICE_ID);
 
+  if (UartLiteStatus != XST_SUCCESS) {
+      xil_printf("UART set up failed");
+      return XST_FAILURE;    
+  }
   // intialize buffer with alphabet data
   for(int i = 0; i < TX_DATA_SIZE; i++)
   {
@@ -79,6 +84,10 @@ int main()
   }
   
   TxStatus = SendData(TxData, TxBuff);
+  if (TxStatus != XST_SUCCESS){
+      xil_printf("TX failed");
+      return XST_FAILURE;
+  }
 
   xil_printf("UART Lite Tx test successfull\n\r");
   cleanup_platform();
