@@ -26,7 +26,7 @@ logic [99:0] testvectors[10000:0];
 
  // load TVs and pulse reset
  initial begin
-   $readmemb("rectlooptb.tv", testvectors);
+  $readmemb("rect_loop_tv.tv", testvectors);
  vectorindex = 0; errors = 0;
  reset = 1; #22; reset = 0;
  end
