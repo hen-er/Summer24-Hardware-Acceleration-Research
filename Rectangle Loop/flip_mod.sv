@@ -1,35 +1,43 @@
 module flip
-  (// parameters
-    // input matrix, r1, r2, c1, c2
-    // output matrix
+  #(parameter int ROWS = 4,
+    parameter int COLS = 4) // arbitrary sizes
+  (input logic [ROWS][COLS] m_in,
+   input logic [1:0] r1,
+   input logic [1:0] r2,
+   input logic [1:0] c1,
+   input logic [1:0] c2,
+   output logic [ROWS][COLS] m_out);
     
-    // loop through each value in m
-    // track the current index in blob of bits with (row num * width + col num)
+  logic clk;
+  
+    // generate a mask which places 1's at the flip coords and 0's everywhere else
+    // declare matrix-length mask
+    logic [ROWS][COLS] mask;
+    // loop through each index
+  always @(posedge clk) begin
+    // how to simulate a for or while loop here? how can we stop the loop when the counter is over the matrix size? 
+      
+    // use mux to assign the proper value for the location
+      
     
-    // check if flip needs to happen-
-    // willFlip = (currIdx == [r1][c1]|[r1][c2]|[r2][c1]|[r2][c2])
-    // checking if at flipping coord
-    
-    // if statements are not synthesizable, so we use a mux
-    // mux to flip based on willFlip
-    
-    // if true, call another module which does the physical flipping
-    
-
+    // XOR the mask with the original matrix
 endmodule
     
-module flipmux
-  (// input: willFlip, matrix, index of flip
-    // output: flipped matrix
     
-    // takes willFlip and if true, return flipped matrix
-    
+module mux(
+  input logic [1:0] r1, 
+  input logic [1:0] r2, 
+  input logic [1:0] c1, 
+  input logic [1:0] c2, 
+  input logic [1:0] row, 
+  input logic [1:0] col,
+  output logic out);
+  
+  // translate the r
+  out = ((row == r1) && (col == c1) ||
+        ((row == r1) && (col == c2) ||
+        ((row == r2) && (col == c1) ||
+         ((row == r2) && (col == c2) ? 1'b1 : 1'b0;
+  
 endmodule
-    
-module bitflipping
-  (// input: matrix, index of flip
-    // output: flipped matrix
-    
-    // must flip only the bit at the index
-    
-endmodule
+      
