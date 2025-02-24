@@ -14,9 +14,10 @@ module flip
     // declare matrix-length mask
     logic [ROWS][COLS] mask;
     // loop through each index
+  // use a variable (looping) to check if the current index is equal to the length of the whole array
+  // loop when variable looping is 0
   always @(posedge clk) begin
-    // how to simulate a for or while loop here? how can we stop the loop when the counter is over the matrix size? 
-      
+        
     // use mux to assign the proper value for the location
       
     
