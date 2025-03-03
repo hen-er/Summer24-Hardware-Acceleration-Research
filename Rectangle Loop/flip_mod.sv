@@ -11,9 +11,7 @@ module flip
   logic clk;
   
   // generate a mask which places 1's at the flip coords and 0's everywhere else
-  // declare matrix-length mask
-  logic [ROWS][COLS] mask;
- 
+  
   // XOR the matrix with the index lengthened to match the form of the matrix as a string
   // creating a mask for every (r,c) combo
   logic [15:0] mask1;
