@@ -19,19 +19,19 @@ module flip
     
   always_comb begin
         mask1 = mask1 + 1;
-        index1 = 15 - (c1*ROWS + r1);
+        index1 = 16 - (r1*ROWS + c1 - 1);
         mask1 = (15'b1 << index1);
       
         mask2 = mask2 + 1;
-        index2 = 15 - (c2*ROWS + r1);
+        index2 = 16 - (r1*ROWS + c2 - 1);
         mask2 = (15'b1 << index2);
     
         mask3 = mask3 + 1;
-        index3 = 15 - (c1*ROWS + r2);
+        index3 = 16 - (r2*ROWS + c1 - 1);
         mask3 = (15'b1 << index3);
       
         mask4 = mask4 + 1;
-        index4 = 15 - (c2*ROWS + r2);  
+        index4 = 16 - (r2*ROWS + c2 - 1);  
         mask4 = (15'b1 << index4); 
   end
 
