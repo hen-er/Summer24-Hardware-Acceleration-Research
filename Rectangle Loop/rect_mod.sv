@@ -45,11 +45,15 @@ module rectangle_loop_2
                             state = FAIL;
                         end
                         
-                        CKBD: begin //this is where we swap
-                        m_outm[r1][c1] <= ~m_outm[r1][c1];
-                        m_outm[r1][c2] <= ~m_outm[r1][c2];
-                        m_outm[r2][c1] <= ~m_outm[r2][c1];
-                        m_outm[r2][c2] <= ~m_outm[r2][c2];
+                        CKBD: begin //this is where we call swap module
+                            flip #(.ROWS(ROW), .COLS(COL), dut(
+                                .m_in(m_in),
+                                .r1(r1),
+                                .r2(r2),
+                                .c1(c1),
+                                .c2(c2),
+                                .m_out(m_out)
+                            );
                         
                         iterations <= iterations + 1;
                         end
