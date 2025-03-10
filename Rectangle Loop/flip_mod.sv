@@ -9,8 +9,6 @@ module flip
    output logic [(ROWS*COLS)-1:0] m_out);
     
    logic clk;
-  
-    int SIZE = (ROWS*COLS)-1;
     logic [3:0] index1, index2, index3, index4;
     logic [15:0] mask1, mask2, mask3, mask4;
 
