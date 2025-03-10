@@ -9,8 +9,9 @@ module flip
    output logic [(ROWS*COLS)-1:0] m_out);
     
    logic clk;
-    logic [3:0] index1, index2, index3, index4;
-    logic [15:0] mask1, mask2, mask3, mask4;
+    logic [3:0] index1, index2, index3, index4; //needs to be parameterized (can we declare int instead)
+    logic [(ROWS*COLS)-1:0] mask1, mask2, mask3, mask4;
+    
 
     always_comb begin
         // Calculate indices for each corner
@@ -20,14 +21,14 @@ module flip
         index4 = (ROWS * COLS - 1) - (r2 * COLS + c2);
 
         // Generate masks by shifting 1 to the calculated indices
-        mask1 = 16'b1 << index1;
-        mask2 = 16'b1 << index2;
-        mask3 = 16'b1 << index3;
-        mask4 = 16'b1 << index4;
+        mask1 = 1 << index1; //is this synthesizable or should we do 16'b1?
+        mask2 = 1 << index2;
+        mask3 = 1 << index3;
+        mask4 = 1 << index4;
     end
 
     // Combine masks and XOR with input to flip bits
-    logic [15:0] finalMask;
+    logic [(ROWS*COLS)-1:0] finalMask;
     assign finalMask = mask1 | mask2 | mask3 | mask4;
     
     assign m_out = m_in ^ finalMask;
