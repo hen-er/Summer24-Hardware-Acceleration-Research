@@ -41,7 +41,7 @@ logic [99:0] testvectors[10000:0];
  if (~reset) begin // skip during reset
    if (m !== m_expected) begin // check result
  $display("Unexpected Result with inputs = %h", {clk, param, m});
- $display(" Expected %h, got %h", resultexpected, result);
+    $display(" Expected %h, got %h", m_expected, m);
  errors = errors + 1;
  end
  vectorindex = vectorindex + 1; //iterate to next testvector
