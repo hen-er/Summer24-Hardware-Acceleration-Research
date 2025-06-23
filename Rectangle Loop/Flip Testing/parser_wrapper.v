@@ -1,22 +1,33 @@
 module parser_wrapper(
     input         clk,
+    input         reset,
     input         start,
-    input  [15:0] from_pc,
-    output        done,
-    output [15:0] to_pc
+    output [3:0] leds
 );
     reg [7:0]  base_addr;
     reg [1:0]  r1, r2, c1, c2;
-
-    always @(posedge clk) begin
-        base_addr <= from_pc[15:8];
-        r1        <= from_pc[7:6];
-        r2        <= from_pc[5:4];
-        c1        <= from_pc[3:2];
-        c2        <= from_pc[1:0];
-    end
-
     wire [15:0] flipped_data;
+    wire done; //make output later
+    
+    //edge-detect on start to create a one-cycle pulse
+    reg start_d, start_p;
+    always @(posedge clk, posedge reset) begin
+        if (reset) begin
+            start_d <= 0;
+            start_p <= 0;
+        end
+        else begin
+            start_p <= start & ~start_d;
+            start_d <= start;
+            base_addr <= 0;
+            r1        <= 1;
+            r2        <= 3;
+            c1        <= 1;
+            c2        <= 2;
+        end
+    end
+    
+    assign leds = flipped_data[3:0];
 
     flip_controller #(
 			  .ROWS (4),
@@ -24,7 +35,8 @@ module parser_wrapper(
 			  .DATA_WIDTH (8)
 			  ) controller_inst (
         .clk(clk),
-        .start(start),
+        .reset(reset),
+        .start(start_p),
         .base_addr(base_addr),
         .r1(r1),
         .r2(r2),
@@ -34,5 +46,4 @@ module parser_wrapper(
         .flipped_out(flipped_data)
     );
 
-    assign to_pc = flipped_data;
 endmodule
