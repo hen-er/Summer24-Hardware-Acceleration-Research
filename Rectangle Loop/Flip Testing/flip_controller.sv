@@ -4,6 +4,7 @@ module flip_controller #(
     parameter DATA_WIDTH = 8
 )(
     input  logic clk,
+    input  logic reset,
     input  logic start,
     input  logic [7:0] base_addr,
     input  logic [1:0] r1, r2, c1, c2,
@@ -20,6 +21,7 @@ module flip_controller #(
         .WORD_BYTES((ROWS*COLS)/DATA_WIDTH)
     ) adapter (
         .clk(clk),
+        .reset(reset),
         .st_read(rd_cmd),
         .st_write(wr_cmd),
         .base_addr(base_addr),
@@ -32,6 +34,7 @@ module flip_controller #(
     // Flip Module
     flip #(.ROWS(ROWS), .COLS(COLS)) flip_u (
         .clk(clk),
+        .reset(reset),
         .m_in(word_in),
         .r1(r1), .r2(r2), .c1(c1), .c2(c2),
         .enable(flip_enable),
@@ -42,35 +45,43 @@ module flip_controller #(
     typedef enum logic [2:0] {S_IDLE, S_READ, S_FLIP, S_WAIT_FLIP, S_WRITE, S_DONE} state_t;
     state_t state, next;
 
-    always_ff @(posedge clk) begin
-        state <= next;
-        case (state)
-            S_READ: begin
-                rd_cmd <= 1;
-                flip_enable <= 0;
-                wr_cmd <=  0;
-                done <= 0;
-            end
-            S_FLIP: begin
-                rd_cmd <= 0;
-                flip_enable <= 1;
-                wr_cmd <=  0;
-                done <= 0;
-            end
-            S_WRITE: begin
-                rd_cmd <= 0;
-                flip_enable <= 0;
-                wr_cmd <=  1;
-                done <= 0;
-            end
-            S_DONE: begin
-                rd_cmd <= 0;
-                flip_enable <= 0;
-                wr_cmd <=  0;
-                done <= 1;
-            end
-            
-        endcase
+    always_ff @(posedge clk, posedge reset) begin
+        if (reset) begin
+            state <= S_IDLE;
+            rd_cmd <= 0;
+            wr_cmd <= 0;
+            flip_enable <= 0;
+            done <= 0;
+        end
+        else begin
+            state <= next;
+            case (state)
+                S_READ: begin
+                    rd_cmd <= 1;
+                    flip_enable <= 0;
+                    wr_cmd <=  0;
+                    done <= 0;
+                end
+                S_FLIP: begin
+                    rd_cmd <= 0;
+                    flip_enable <= 1;
+                    wr_cmd <=  0;
+                    done <= 0;
+                end
+                S_WRITE: begin
+                    rd_cmd <= 0;
+                    flip_enable <= 0;
+                    wr_cmd <=  1;
+                    done <= 0;
+                end
+                S_DONE: begin
+                    rd_cmd <= 0;
+                    flip_enable <= 0;
+                    wr_cmd <=  0;
+                    done <= 1;
+                end
+            endcase
+        end
     end
     
     always_comb begin
