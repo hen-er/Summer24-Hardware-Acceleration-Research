@@ -3,6 +3,7 @@ module flip #(
     parameter COLS = 4
 )(
     input logic clk,
+    input logic reset,
     input logic [(ROWS*COLS)-1:0] m_in,
     input logic [1:0] r1, r2, c1, c2,
     input logic enable,
@@ -27,11 +28,15 @@ module flip #(
 
     assign finalMask = mask1 | mask2 | mask3 | mask4;
 
-    always_ff @(posedge clk) begin
-        if (enable) begin
+    always_ff @(posedge clk, posedge reset) begin
+        if (reset) begin 
+            m_out <= 0;
+            flip_done <= 0;
+        end
+        else if (enable) begin
           m_out      <= m_in ^ finalMask;
           flip_done  <= 1;
         end
-        else flip_done <= 0;
+        else flip_done <= 0; //possibly redundant
     end
 endmodule
