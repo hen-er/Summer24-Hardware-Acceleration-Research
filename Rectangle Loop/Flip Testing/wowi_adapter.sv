@@ -14,7 +14,7 @@ module wowi_adapter #(
 );
 
     logic [(DATA_WIDTH-1):0] bram_dout;
-    logic [(DATA_WIDTH-1):0] bram_addr;
+    logic [(DATA_WIDTH-1):0]bram_addr;
     logic [(DATA_WIDTH-1):0] bram_din;
     logic bram_we, bram_ena;
 
@@ -27,7 +27,7 @@ module wowi_adapter #(
         .data_out(bram_dout)
     );
 
-    typedef enum logic [1:0] {IDLE, READ_ADDR, READ_DATA, WRITE} state_t;
+    typedef enum logic [2:0] {IDLE, READ_ADDR, READ_DATA, WRITE} state_t;
     state_t state, next;
     logic [1:0] count;
 
@@ -50,14 +50,12 @@ module wowi_adapter #(
                     bram_we <= 0;
                     flip_ready <= 0;
                     wrt_done <= 0;
+                    bram_addr <= 0;
                     count <= 0;
                 end
                 
-                READ_ADDR: begin
-                    bram_we <= 0;
-                    bram_addr = base_addr + count;
-                end
-            
+                READ_ADDR: bram_addr <= base_addr + 1;
+                                
                 READ_DATA: begin
                     read_data[count*DATA_WIDTH +: DATA_WIDTH] <= bram_dout;
                     if (count == WORD_BYTES-1) flip_ready <= 1;
@@ -74,7 +72,7 @@ module wowi_adapter #(
             endcase
         end
     end
-
+    
     always_comb begin
         case (state)
             IDLE: begin
@@ -83,12 +81,15 @@ module wowi_adapter #(
                 else next = IDLE;
             end
             
-            READ_ADDR: next = READ_DATA;
+            READ_ADDR: begin
+                if (!st_read) next = IDLE;
+                else next = READ_DATA;
+            end
 
             READ_DATA: begin
-                if (count == WORD_BYTES-1) next  = IDLE;
+                if (flip_ready) next = IDLE;
                 else next = READ_ADDR;
-            end
+            end    
 
             WRITE: begin
                 if (count == WORD_BYTES-1) next  = IDLE;
