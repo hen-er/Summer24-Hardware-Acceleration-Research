@@ -1,0 +1,174 @@
+# MicroBlaze System Project Documentation
+
+This repository contains the hardware and software components required to build a MicroBlaze-based embedded system using AMD Vivado and Vitis. The design featured in this folder integrates an initialized Block RAM (BRAM), UARTLite for serial communication, GPIO interfaces, and a custom RTL module.
+
+This guide provides step-by-step instructions to recreate the current stage of the project from scratch using Vivado’s IP Integrator and Vitis IDE.
+
+---
+
+## Table of Contents
+
+1. [Instantiating the BRAM]
+2. [Creating the Block Design]
+3. [Generating and Exporting Hardware]
+4. [Setting Up the Application in Vitis]
+5. [Troubleshooting]
+6. [Closing Remarks]
+
+---
+
+## 1. Instantiating the BRAM
+
+1. Having created a project in **Vivado**, open the **IP Catalog** from the *Project Manager* tab.
+2. Search for **Block Memory Generator** and double-click to customize it.
+3. Configure the IP as follows:
+   - **Basic Tab**:
+     - Enable **Byte Write Enable**
+     - Set **Byte Size** to **8 bits**
+   - **Port A Options**:
+     - Write Width: **8**
+     - Write Depth: **256** *(modifiable as project evolves)*
+   - **Other Options**:
+     - Enable **Load Init File** and upload your `.coe` file
+     - Enable **Fill Remaining Memory Locations** to zero-fill unused entries
+
+4. After generating the BRAM IP:
+   - Add the corresponding BRAM wrapper/module from the design sources provided in the repo in the file named Flip Testing
+   - Ensure the instance name of the `blk_mem_gen` matches the customized IP name
+
+---
+
+## 2. Creating the Block Design
+
+### Prerequisites
+
+- All modules/design sources must be added to the Vivado project before starting
+- Ensure the top module is written in **Verilog**, not SystemVerilog, to be IP Integrator compatible
+
+### Step-by-Step Instructions
+
+1. Navigate to the the **IP Integrator** tab and select **Create Block Design**.
+2. Name the design appropriately (e.g., `system_bd`).
+3. Add the **MicroBlaze** core:
+   - Click the **+** in the canvas and search for **MicroBlaze**
+   - Select it and click **Run Block Automation**
+   - Enable only the **Interrupt Controller** option *(other modications will be made as project evolves)*
+4. Modify generated components:
+   - `microblaze_0_xlconcat`: Change the number of ports from 2 to **1**
+   - `clk_wiz_1`:
+     - **Board Tab**: Set `CLK_IN1` to `sys_clock`
+     - **Output Clocks**: Change **Reset Type** to **Active Low**
+5. Run **Connection Automation** and accept all prompts.
+
+---
+
+### Adding Peripherals
+
+#### AXI UARTLite
+
+1. Add **AXI UartLite** from the IP catalog by clicking the **+** at the top of the Diagram window.
+2. Customize the IP:
+   - Under **Board Tab**, change `uart` to `usb_uart`
+   - Leave all other settings unchanged
+3. Run **Connection Automation**
+4. Manually connect:
+   - `axi_uartlite_0/interrupt` → `microblaze_0_xlconcat/In0`
+
+#### AXI GPIO
+
+1. Similarly, add **AXI GPIO** from the IP catalog.
+2. Double-click `axi_gpio_0` and apply the following:
+   - **GPIO (Channel 1)**:
+     - Direction: **All Outputs**
+     - Width: **16 bits**
+     - Enable Dual Channel: 
+   - **GPIO2 (Channel 2)**:
+     - Direction: **All Inputs**
+     - Width: **16 bits**
+   - Ensure board interfaces remain set to **Custom**
+3. Select **Connection Automation** at the top of the window and select all boxes.
+
+---
+
+### Adding the Custom Module
+
+1. Right-click on the block diagram canvas and select **Add Module**.
+2. Choose the Verilog top-level module (e.g., `parser_wrapper.v`).
+3. Connect the following:
+   - `clk_wiz_1/clk_out1` → module’s `clk`
+   - `rst_clk_wiz_1_100M/interconnect_aresetn` → module’s `reset`
+   - `axi_gpio_0/GPIO` (output) → module’s input signal (e.g., `from_pc`)
+   - `axi_gpio_0/GPIO2` (input) → module’s output signal (e.g., `to_pc`)
+4. Create a new port:
+   - Right-click the canvas → **Create Port**
+   - Name: `start`
+   - Direction: **Input**
+   - Connect this to the module’s `start` signal
+
+---
+
+## 3. Generating and Exporting Hardware
+
+1. In the **Sources** pane:
+   - Right-click the block design and select **Create HDL Wrapper**
+   - Choose **Let Vivado manage wrapper and auto-update**
+2. Set the wrapper as top module:
+   - Right-click → **Set as Top**
+3. Generate the bitstream:
+   - In **Flow Navigator**, click **Generate Bitstream**
+4. After generation:
+   - Go to **File → Export → Export Hardware**
+   - Enable **Include Bitstream**
+   - This will save the `.xsa` file to your project directory
+
+---
+
+## 4. Setting Up the Application in Vitis
+
+1. In Vivado, go to **Tools → Launch Vitis IDE**.
+2. When prompted, choose a workspace location where relevant platform and application files will be saved.
+3. Create a new platform:
+   - Go to **Create Platform Component**
+   - Name the component
+   - Under **Flow**, click browse and select the `.xsa` file exported from Vivado
+   - Click **Finish**
+   - Once created, click **Build** under the *Flow* tab
+4. Create the application:
+   - Click **+** under *Vitis Components → Application*
+   - Name and specify location
+   - Select the newly created platform in the **Hardware** tab
+   - Click **Finish**
+5. Add source files:
+   - Navigate to `src` under the application
+   - Right-click → **Add New File** → `main.c`
+   - Paste in the contents of `main.c` from this folder
+6. Include platform setup files:
+   - Either:
+     - Manually add `platform.c` and `platform.h` (included in this folder), or
+     - Use the **Hello World** template and replace the source with `main.c`
+7. Build the application
+8. If build succeeds:
+   - Connect the FPGA via USB
+   - Open a terminal (e.g., **TeraTerm**) and connect to the FPGA
+   - Run the application
+   - Observe output behavior of the custom RTL module
+
+---
+
+## 5. Troubleshooting
+
+### Issue: Header File Errors (e.g., `xparameters.h` not found)
+
+- Regenerate the BSP (Board Support Package).
+- Add the following at the top of your source files (e.g. `main.c`):
+  #define __MICROBLAZE__
+
+---
+
+## 6. Closing Remarks
+
+This project is still evolving, and there are certainly opportunities to improve the hardware architecture, automation scripts, and documentation process. As a learning-focused initiative, this guide aims to fill the gap in Vivado/Vitis documentation by offering a complete, replicable workflow for newcomers and developers working with MicroBlaze-based systems.
+
+Thank you for reading.
+
+Feel free to submit issues or suggestions via GitHub.
